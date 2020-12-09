@@ -4,13 +4,35 @@ const bcryptjs = require('bcryptjs');
 const { existeEmail } = require('../middlewares/existeEmail');
 const { generarJWT } = require('../helpers/jwt');
 const getUsuarios = async (req, res) => {
+    // leer param opcional de la url
+    let paramDesde = Number(req.query.desde) || 0;
+    try {
 
-    // obtener usuarios de la base de datos
-    const usuarios = await Usuario.find({}, 'role google nombre email');
-    res.json({
-        ok: true,
-        usuarios
-    });
+        // ejecutar estas promesas de manera simultanea (devuelve un array) y almacenar resultados en variables
+        const [usuarios, totalUsers] = await Promise.all([
+            // obtener usuarios de la base de datos
+            Usuario
+                .find({}, 'role google nombre email img')
+                .skip( paramDesde )
+                .limit(5),
+            // obtener el total de registros Usuario en la bd
+            Usuario.count()
+        ]);
+
+        
+        return res.json({
+            ok: true,
+            usuarios,
+            total: `Total de usuarios: ${totalUsers}`
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+         ok: false,
+         msg: 'Ocurrio un error inesperado, consulte al administrador.'
+        });
+    }
 }
 
 const postUsuarios = async (req, res = response) => {
@@ -121,3 +143,7 @@ module.exports = {
     putUsuarios, 
     deleteUsuarios
 }
+
+// var serveIndex = require('serve-index');
+// app.use(express.static(__dirname + '/'))
+// app.use('/uploads', serveIndex(__dirname + '/uploads'));

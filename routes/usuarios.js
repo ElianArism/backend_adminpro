@@ -11,9 +11,6 @@ const { check } = require('express-validator');
 // controllers
 const { getUsuarios, postUsuarios, putUsuarios, deleteUsuarios } = require('../controllers/usuarios');
 
-
-
-
 router.get('/', validarJWT, getUsuarios);
 router.post('/', 
   [
@@ -27,6 +24,7 @@ postUsuarios);
 
 router.put('/:id',
   [
+    validarJWT,
     check('nombre', 'El nombre es obligatorio').not().isEmpty(),
     check('email', 'El correo es obligatorio').isEmail(),
     check('role', 'El role es obligatorio').not().isEmpty(),
@@ -34,6 +32,6 @@ router.put('/:id',
   ],
 putUsuarios);
 
-router.delete('/:id', deleteUsuarios);
+router.delete('/:id', validarJWT, deleteUsuarios);
 
 module.exports = router;
