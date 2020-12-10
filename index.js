@@ -24,6 +24,12 @@ app.use('/api/upload', require('./routes/uploads'));
 // inicializar BD
 dbConnection();
 
+
+// directorio publico 
+// middleware necesario
+app.use(express.static('public')); //registra la carpeta como publica
+
+
 // asignandole un puerto y levantando el sv
 app.listen(process.env.PORT, () => {
     console.log(`Servidor corriendo en el puerto ${process.env.PORT}`);
