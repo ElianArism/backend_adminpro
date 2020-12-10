@@ -10,22 +10,24 @@ const { check } = require('express-validator');
 
 // controllers
 const { getHospitales, postHospitales, putHospitales, deleteHospitales } = require('../controllers/hospitales');
-router.get('/' , getHospitales);
+router.get('/' ,validarJWT, getHospitales);
 
 router.post('/', 
 [
   validarJWT,
   check('nombre', 'El nombre del hospital es necesario').not().isEmpty(),
-  validarCampos
+  validarCampos,
 ], postHospitales); 
 
 router.put('/:id',
   [
-   
+    validarJWT,
+    check('nombre', 'El nombre del hospital es necesario').not().isEmpty(),
+    validarCampos
   ],
 putHospitales);
 
-router.delete('/:id', deleteHospitales);
+router.delete('/:id', validarJWT, deleteHospitales);
 
 
 module.exports = router;

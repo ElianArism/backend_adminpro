@@ -53,18 +53,62 @@ const postHospitales = async (req, res = response) => {
     });
 }
 
-const putHospitales = (req, res = response) => {
-    return res.json({
-        ok:true, 
-        hospitalDB: 'getHospitales'
-    });
+const putHospitales = async (req, res = response) => {
+    const id = req.params.id;
+    const { nombre } = req.body;
+    
+    const campos = { usuario: id, nombre }; 
+    
+    try {
+        const hospital = await Hospital.findById(id);
+        
+        if(hospital) {
+            const hospitalDB = await Hospital.findByIdAndUpdate(id, campos, {new:true});
+            
+            return res.json({
+                ok:true, 
+                hospitalDB
+            });
+        } else {
+            return res.status(404).json({
+                ok: false, 
+                msg: 'No se encontro un hospital que coincida con ese id'
+            });
+        }
+        
+    } catch (error) {
+        return res.status(500).json({
+            ok:false, 
+            msg: 'Internal Server Error: Contacte con el administrador'
+        });
+    }
+    
+    
 }
 
-const deleteHospitales = (req, res = response) => {
-    return res.json({
-        ok:true, 
-        msg: 'getHospitales'
-    });
+const deleteHospitales = async (req, res = response) => {
+    const id = req.params.id;
+
+    try {
+        const hospitalEliminado = await Hospital.findByIdAndDelete(id);
+        if(!hospitalEliminado) {
+            return res.status(404).json({
+                ok: false, 
+                msg: 'Not found: no se encontro un hospital con ese id'
+            });
+        }
+        return res.json({
+            ok:true, 
+            msg: `Se elimino el ${hospitalEliminado.nombre}`
+        });
+
+        
+    } catch (error) {
+        return res.status(500).json({
+            ok:false, 
+            msg: 'Internal Server Error: Contacte con el administrador'
+        });
+    }
 }
 
 module.exports = {

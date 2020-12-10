@@ -25,7 +25,10 @@ postMedicos);
 
 router.put('/:id',
   [
-    
+    validarJWT,
+    check('nombre', 'El nombre es obligatorio').not().isEmpty(),
+    check('hospital', 'El id del hospital es obligatorio').not().isEmpty(),
+    validarCampos
   ],
 putMedicos);
 

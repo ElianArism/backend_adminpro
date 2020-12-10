@@ -1,5 +1,6 @@
 const { response } = require("express");
 const Medico = require('../models/medico');
+const Hospital = require('../models/hospital');
 
 const getMedicos = async (req, res = response) => {
     try {
@@ -53,18 +54,74 @@ const postMedicos = async (req, res = response) => {
     });
 }
 
-const putMedicos = (req, res = response) => {
-    return res.json({
-        ok: true,
-        msg: 'Medicos works!'
-    });
+const putMedicos = async (req, res = response) => {
+    const id = req.params.id; 
+    const uid = req.uid; 
+    const { nombre, hospital } = req.body; 
+    
+    // validar id hospital
+    try {
+        await Hospital.findById(hospital);
+        
+    } catch (error) {
+        return res.status(401).json({
+            ok: false, 
+            msg: 'Id del hospital invalido'
+        });            
+    }
+
+    // actualizar medico
+    try {
+        const campos = {usuario: uid, nombre, hospital }; 
+        const medicoDB = await Medico.findByIdAndUpdate(id, campos, {new: true}); 
+        
+        if(!medicoDB) {
+            return res.status(404).json({
+                ok: false, 
+                msg: 'No se encontro un medico que coincida con ese id'
+            });
+        }
+
+        return res.json({
+            ok: true,
+            medicoDB
+        });
+        
+        
+    } catch (error) {
+        return res.status(500).json({
+            ok: false,
+            msg: 'Ocurrio un error inesperado, consulte al administrador.' + error
+        });
+    }
+    
 }
 
-const deleteMedicos = (req, res = response) => {
-    return res.json({
-        ok: true,
-        msg: 'Medicos works!'
-    });
+const deleteMedicos = async (req, res = response) => {
+    const id = req.params.id; 
+    try {
+        const medicoEliminado = await Medico.findByIdAndDelete(id);
+        
+        if(!medicoEliminado) {
+            return res.status(401).json({
+                ok: false, 
+                msg: 'Id del medico invalido'
+            });
+        }
+        
+        return res.json({
+            ok: true,
+            msg: `Medico eliminado ${medicoEliminado.nombre}`
+        });
+        
+    } catch (error) {
+        return res.status(500).json({
+            ok: false,
+            msg: 'Ocurrio un error inesperado, consulte al administrador.' + error
+        });
+    }
+
+
 }
 
 module.exports = {
