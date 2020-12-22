@@ -9,9 +9,15 @@ const { validarJWT } = require('../middlewares/validar-jwt');
 const { check } = require('express-validator');
 
 // controllers
-const { getMedicos, postMedicos, putMedicos, deleteMedicos } = require('../controllers/medicos');
+const { 
+  getMedicos, 
+  postMedicos, 
+  putMedicos, 
+  deleteMedicos, 
+  getMedicoById 
+} = require('../controllers/medicos');
 
-router.get('/', getMedicos);
+router.get('/', validarJWT, getMedicos);
 
 router.post('/', 
   [
@@ -32,6 +38,9 @@ router.put('/:id',
   ],
 putMedicos);
 
-router.delete('/:id', deleteMedicos);
+router.delete('/:id', validarJWT, deleteMedicos);
+
+// traer un medico en especifico
+router.get('/:id', validarJWT, getMedicoById);
 
 module.exports = router;

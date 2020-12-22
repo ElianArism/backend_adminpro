@@ -100,8 +100,12 @@ const renovarToken = async (req, res = response ) => {
     // generar jwt 
     const token = await generarJWT(uid);
     
+    // buscar usuario con este id 
+    const usuarioDB = await Usuario.findById(uid);
+       
     return res.json({
         ok: true, 
+        usuarioDB,
         token, 
     });
 }

@@ -3,17 +3,24 @@ const Medico = require('../models/medico');
 const Hospital = require('../models/hospital');
 
 const getMedicos = async (req, res = response) => {
+    const desde = Number(req.query.desde) || 0;
     try {
         // traer todos los medicos de la db
-        const medicos = await  
-            Medico.find()
-            // traer el nombre del usuario/hospital que corresponda al id almacenado en el campo "usuario/hospital"
-            .populate('usuario', 'nombre img')
-            .populate('hospital', 'nombre img');
+        const [totalMedicos, medicos] = await Promise.all([
+            Medico.count(),
+            Medico
+                .find()
+                .skip(desde)
+                .limit(5)
+                // traer el nombre del usuario/hospital que corresponda al id almacenado en el campo "usuario/hospital"
+                .populate('usuario', 'nombre img')
+                .populate('hospital', 'nombre img')
+        ]);
 
         return res.json({
             ok: true,
-            medicos
+            medicos, 
+            totalMedicos
         });
         
     } catch (error) {
@@ -124,8 +131,35 @@ const deleteMedicos = async (req, res = response) => {
 
 }
 
+// traer un medico por id
+const getMedicoById = async (req, res = response) => {
+    const id = req.params.id; 
+    
+   if(id !== 'nuevo') {
+        try {
+        // traer todos los medicos de la db
+        const medico = await 
+            Medico.findById(id)
+            // traer el nombre del usuario/hospital que corresponda al id almacenado en el campo "usuario/hospital"
+            .populate('usuario', 'nombre img')
+            .populate('hospital', 'nombre img');
+
+        return res.json({
+            ok: true,
+            medico
+        });
+        
+        } catch (error) {
+            return res.status(500).json({
+            ok: false,
+            msg: 'Ocurrio un error inesperado, consulte al administrador.'+error
+            });
+        }
+    }
+}
 module.exports = {
     getMedicos,
+    getMedicoById,
     postMedicos,
     putMedicos,
     deleteMedicos

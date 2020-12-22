@@ -3,6 +3,7 @@ const Usuario = require('../models/usuario');
 const bcryptjs = require('bcryptjs');
 const { existeEmail } = require('../middlewares/existeEmail');
 const { generarJWT } = require('../helpers/jwt');
+
 const getUsuarios = async (req, res) => {
     // leer param opcional de la url
     let paramDesde = Number(req.query.desde) || 0;
@@ -23,7 +24,7 @@ const getUsuarios = async (req, res) => {
         return res.json({
             ok: true,
             usuarios,
-            total: `Total de usuarios: ${totalUsers}`
+            total: totalUsers
         });
 
     } catch (error) {
@@ -88,14 +89,27 @@ const putUsuarios = async (req, res) => {
             // comprueba que no exista otro registro con el nuevo email que quiere actualizar
             existeEmail(req, res);
         }
-        campos.email = email; // si no existe, se le regresa el email
+
+        // si es de google no puede cambiar su email
+        if(!usuarioDB.google) {
+            campos.email = email; // si no existe, se le regresa el email
+        } else if (usuarioDB.email !== email){ 
+            return res.status(400).json({
+                ok: false, 
+                msg: 'Usuarios de google no pueden cambiar su correo'
+            });
+        }
 
         // actualizar usuario 
         const usuarioActualizado = await Usuario.findByIdAndUpdate(uid, campos, {new: true});
 
+        // generar JWT 
+        const token = await (generarJWT(usuarioActualizado.id));
+
         return res.json({
             ok: true,
-            usuarioActualizado
+            usuarioActualizado, 
+            token
         });
 
     } catch (error) {
@@ -120,9 +134,10 @@ const deleteUsuarios = async (req, res = response) => {
                 msg: 'No se encontro un usuario que coincida con ese id.'
             });
         }
+
         
         // eliminar usuario
-        await Usuario.findOneAndDelete(uid);
+        await Usuario.findOneAndDelete({'_id':uid}); //se manda un objeto donde la clave es la clave del id en el registro de la bd y el valor es el traido por params
 
         return res.json({
             ok: true, 
@@ -143,7 +158,3 @@ module.exports = {
     putUsuarios, 
     deleteUsuarios
 }
-
-// var serveIndex = require('serve-index');
-// app.use(express.static(__dirname + '/'))
-// app.use('/uploads', serveIndex(__dirname + '/uploads'));

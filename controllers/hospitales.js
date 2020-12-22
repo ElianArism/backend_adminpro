@@ -2,19 +2,42 @@ const {response} = require('express');
 const Hospital = require('../models/hospital');
 
 const getHospitales = async (req, res = response) => {
+    let paramDesde = Number(req.query.desde) || 0;
+    let cantidadATraer = req.query.cantidad || 'five';
 
+    
     try {
         // traer hospitales de la db
-        const hospitales = await 
-            Hospital.find()
-            // traer el nombre del usuario que corresponda al id almacenado en el campo "usuario"
-            .populate('usuario', 'nombre img') ;
+        if(cantidadATraer === 'all') {
+            const hospitales = await Hospital
+                .find()
+                // traer el nombre del usuario que corresponda al id almacenado en el campo "usuario"
+                .populate('usuario', 'nombre img')
 
-        return res.json({
-            ok:true, 
-            hospitales
-        });
+                return res.json({
+                    ok:true, 
+                    hospitales
+                });
 
+        } else {
+            
+            const [totalHospitales, hospitales] = await Promise.all([ 
+                Hospital.count(),
+                Hospital
+                    .find()
+                    .skip(paramDesde)
+                    .limit(5)
+                    // traer el nombre del usuario que corresponda al id almacenado en el campo "usuario"
+                    .populate('usuario', 'nombre img')
+                ]);
+                    
+                return res.json({
+                    ok:true, 
+                    hospitales,
+                    totalHospitales
+                });
+        }
+      
     } catch (error) {
        console.log(error);
        return res.status(500).json({

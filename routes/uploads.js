@@ -17,7 +17,7 @@ router.use(expressUpload());
 router.put('/:tabla/:id' , validarJWT, fileUpload);
 
 // obtener img 
-router.get('/:tabla/:foto', validarJWT, retornarImg)
+router.get('/:tabla/:foto', retornarImg)
 
 
 
