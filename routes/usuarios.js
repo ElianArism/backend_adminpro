@@ -4,7 +4,7 @@ const router = Router();  // metodo de express
 // middlewares
 const {validarCampos} = require('../middlewares/validar-campos');
 const {existeEmail} = require('../middlewares/existeEmail');
-const { validarJWT } = require('../middlewares/validar-jwt');
+const { validarJWT, validarAdminRole, validarAdminRoleOMismoUsuario } = require('../middlewares/validar-jwt');
 
 // estos middlewares son de la libreria express validator
 const { check } = require('express-validator');
@@ -25,6 +25,7 @@ postUsuarios);
 router.put('/:id',
   [
     validarJWT,
+    validarAdminRoleOMismoUsuario,
     check('nombre', 'El nombre es obligatorio').not().isEmpty(),
     check('email', 'El correo es obligatorio').isEmail(),
     check('role', 'El role es obligatorio').not().isEmpty(),
@@ -32,6 +33,7 @@ router.put('/:id',
   ],
 putUsuarios);
 
-router.delete('/:id', validarJWT, deleteUsuarios);
+router.delete('/:id', [validarJWT, 
+  validarAdminRole], deleteUsuarios);
 
 module.exports = router;

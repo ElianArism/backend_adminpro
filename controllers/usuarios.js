@@ -38,7 +38,9 @@ const getUsuarios = async (req, res) => {
 
 const postUsuarios = async (req, res = response) => {
     const { password, nombre } = req.body;
+
     let userDB;
+
     // crear nuevo usuario         
     const usuario = new Usuario(req.body);
 
@@ -71,7 +73,7 @@ const postUsuarios = async (req, res = response) => {
 
 const putUsuarios = async (req, res) => {
     const uid = req.params.id;
-
+    
     try {
         const usuarioDB = await Usuario.findById(uid); 
         
@@ -105,7 +107,7 @@ const putUsuarios = async (req, res) => {
 
         // generar JWT 
         const token = await (generarJWT(usuarioActualizado.id));
-
+        
         return res.json({
             ok: true,
             usuarioActualizado, 
@@ -115,7 +117,7 @@ const putUsuarios = async (req, res) => {
     } catch (error) {
         return res.status(500).json({  
             ok: false, 
-            msg: 'Error inesperado, revisar logs.', error
+            msg: 'Error inesperado, revisar logs.'+ error
         });
     }
 }
